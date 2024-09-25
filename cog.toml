@@ -1,0 +1,20 @@
+from_latest_tag = false
+ignore_merge_commits = true
+generate_mono_repository_global_tag = true
+branch_whitelist = ["develop", "release/**"]
+skip_untracked = false
+post_bump_hooks = ["git checkout develop", "git merge release/{{version}}", "git branch -d release/{{version}}"]
+
+[commit_types]
+merge = { changelog_title = "Merge", omit_from_changelog = true }
+chore = { changelog_title = "chore", omit_from_changelog = true }
+feat = { changelog_title = "Feature" }
+fix = { changelog_title = "Bug Fixes" }
+docs = { changelog_title = "docs", omit_from_changelog = true }
+refactor = { changelog_title = "Modified" }
+revert = { changelog_title = "Removed" }
+
+[changelog]
+template = "template.tera"
+path = "CHANGELOG.md"
+authors = [{ signature = "carddamom", username = "carddamom" }]

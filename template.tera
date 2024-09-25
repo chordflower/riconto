@@ -1,0 +1,42 @@
+{%- if version.tag -%}
+{%- set version_str = version.tag -%}
+{%- else -%}
+{%- set id_str = version.id | truncate(length=10, end="") -%}
+{%- set version_str = id_str -%}
+{%- endif -%}
+
+## Version {{ version_str }}
+{% set breaking_changes = commits | filter(attribute="breaking_change",value=true) -%}
+{%- if breaking_changes | length > 0 %}
+### *Breaking Changes*
+{% for commit in breaking_changes -%}
+{%- if repository_url is defined and repository_url is string -%}
+{%- set link = "(link:" ~ repository_url ~ "/commit/" ~ commit.id ~ "[" ~ commit.id ~ "])" -%}
+{%- else -%}
+{%- set id_short = commit.id | truncate(length=7, end="") -%}
+{%- set link = "(" ~ id_short ~ ")" -%}
+{%- endif -%}
+{%- if commit.scope is defined and commit.scope is string -%}
+* {{commit.scope}}: {{commit.summary}} - {{link}}
+{%- else -%}
+* {{commit.summary}} - {{link}}
+{% endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- set comms = commits | filter(attribute="breaking_change",value=false) | sort(attribute="type") -%}
+{%- for type, typed_commits in comms | group_by(attribute="type") %}
+### {{type | upper_first }}
+{% for commit in typed_commits | sort(attribute="date") | reverse -%}
+{%- if repository_url is defined and repository_url is string -%}
+{%- set link = "(link:" ~ repository_url ~ "/commit/" ~ commit.id ~ "[" ~ commit.id ~ "])" -%}
+{%- else -%}
+{%- set id_short = commit.id | truncate(length=7, end="") -%}
+{%- set link = "(" ~ id_short ~ ")" -%}
+{%- endif -%}
+{%- if commit.scope is defined and commit.scope is string -%}
+* {{commit.scope}}: {{commit.summary}} - {{link}}
+{% else -%}
+* {{commit.summary}} - {{link}}
+{% endif -%}
+{%- endfor -%}
+{%- endfor -%}
