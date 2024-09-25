@@ -233,3 +233,5 @@ nohup.out
 secring.*
 
 
+.idea/
+internal/model/config_enum.go
