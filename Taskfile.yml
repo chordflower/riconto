@@ -1,0 +1,22 @@
+version: "3"
+output: "prefixed"
+tasks:
+  clean:
+    desc: "Cleans the generated files"
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - cmd: "go clean -cache"
+      - cmd: "go clean -i ./..."
+      - cmd: "rm -f riconto riconto.exe"
+      - cmd: "rm -f termsize termsize.exe"
+  compile:
+    desc: "Generates the binaries"
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - cmd: "go build -o . ./cmd/..."
+  build:
+    desc: "Builds a fresh version of the binaries"
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - task: "clean"
+      - task: "compile"

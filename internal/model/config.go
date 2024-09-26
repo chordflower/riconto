@@ -31,7 +31,6 @@ import (
 
 // Config represents the project configuration file
 type Config struct {
-	Schema      string   `json:"$schema"`
 	Name        string   `json:"name" yaml:"name" toml:"name"`
 	Version     string   `json:"version" yaml:"version"  toml:"version"`
 	Description string   `json:"description" yaml:"description" toml:"description"`
@@ -61,7 +60,6 @@ func NewConfig(name string, version string, description string) *Config {
 // NewConfigFrom copies the given configuration.
 func NewConfigFrom(config *Config) *Config {
 	res := &Config{
-		Schema:      config.Name,
 		Name:        config.Name,
 		Version:     config.Version,
 		Description: config.Description,
@@ -72,6 +70,38 @@ func NewConfigFrom(config *Config) *Config {
 		res.Authors = append(res.Authors, *NewAuthorFrom(&author))
 	}
 	return res
+}
+
+// SaveTo saves the configuration to the given writer in the given format
+func (c *Config) SaveTo(writer io.Writer, format Format) error {
+	var err error
+	switch format {
+	case FormatJson:
+		encoder := jsoniter.NewEncoder(writer)
+		err = encoder.Encode(c)
+		if err != nil {
+			return errors.Wrap(err, "Unable to encode the file as json")
+		}
+	case FormatToml:
+		encoder := toml.NewEncoder(writer)
+		err = encoder.Encode(c)
+		if err != nil {
+			return errors.Wrap(err, "Unable to encode the file as toml")
+		}
+	case FormatYaml:
+		encoder := yaml.NewEncoder(writer)
+		err = encoder.Encode(c)
+		if err != nil {
+			return errors.Wrap(err, "Unable to encode the file as yaml")
+		}
+	default:
+		encoder := jsoniter.NewEncoder(writer)
+		err = encoder.Encode(c)
+		if err != nil {
+			return errors.Wrap(err, "Unable to encode the file as json")
+		}
+	}
+	return nil
 }
 
 // Author represents an package author

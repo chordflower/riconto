@@ -17,18 +17,38 @@
  * along with riconto.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package commands
 
 import (
-	"github.com/chordflower/riconto/internal/commands"
 	"github.com/tucnak/climax"
 )
 
-func main() {
-	initCmd := commands.NewInitCommand()
-	riconto := climax.New("riconto")
-	riconto.Brief = "A tool to create markdown based documents"
-	riconto.Version = "0.0.1"
-	riconto.AddCommand(initCmd.Command())
-	riconto.Run()
+type Command interface {
+	Name() string
+	Brief() string
+	Usage() string
+	Help() string
+	Group() string
+	Flags() []climax.Flag
+	Examples() []climax.Example
+	Run(context climax.Context) int
+	Command() climax.Command
+}
+
+func FromCommand(c Command) climax.Command {
+	result := climax.Command{
+		Name:   c.Name(),
+		Brief:  c.Brief(),
+		Usage:  c.Usage(),
+		Help:   c.Help(),
+		Group:  c.Group(),
+		Handle: c.Run,
+	}
+	for _, flag := range c.Flags() {
+		result.AddFlag(flag)
+	}
+	for _, example := range c.Examples() {
+		result.AddExample(example)
+	}
+	return result
 }

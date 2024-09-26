@@ -233,5 +233,8 @@ nohup.out
 secring.*
 
 
-.idea/
-internal/model/config_enum.go
+/.idea/
+/internal/model/config_enum.go
+/riconto
+/termsize
+/tmp/
