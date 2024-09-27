@@ -242,3 +242,5 @@ secring.*
 /riconto
 /termsize
 /tmp/
+/golangci-report.checkstyle.xml
+/golangci-report.junit.xml
