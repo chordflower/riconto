@@ -1,0 +1,38 @@
+name: "Build project"
+on:
+  pull_request:
+    branches:
+      - development
+  push:
+    branches:
+      - development
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+jobs:
+  build:
+    name: "Build the repository"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout the code"
+        uses: actions/checkout@v4.2.0
+        with:
+          lfs: true
+          submodules: true
+      - name: "Setup golang"
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Builds the code"
+        run: "task build"
+      - name: "Lint code with golangci"
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
