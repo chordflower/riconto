@@ -21,16 +21,17 @@ package commands
 
 import (
 	"fmt"
-	"github.com/buger/goterm"
-	"github.com/chordflower/riconto/internal/model"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/phsym/console-slog"
-	"github.com/tucnak/climax"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/buger/goterm"
+	"github.com/chordflower/riconto/internal/model"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/phsym/console-slog"
+	"github.com/tucnak/climax"
 )
 
 type InitCommand struct {

@@ -1,0 +1,87 @@
+[run]
+timeout = "5m"
+tests = false
+
+[output]
+print-issued-lines = true
+print-linter-name = true
+unique-by-line = true
+sort-results = true
+show-stats = true
+
+[[output.formats]]
+format = "line-number"
+path = "stdout"
+
+[[output.formats]]
+format = "checkstyle"
+path = "golangci-report.checkstyle.xml"
+
+[[output.formats]]
+format = "junit-xml-extended"
+path = "golangci-report.junit.xml"
+
+[linters-settings.goconst]
+ignore-tests = true
+
+[linters-settings.sloglint]
+attr-only = true
+no-global = "all"
+
+[linters-settings.unused]
+exported-fields-are-used = true
+
+[linters-settings.makezero]
+always = true
+
+[linters-settings.nestif]
+min-complexity = 15
+
+[linters]
+disable-all = true
+enable = [
+  "asasalint",
+  "asciicheck",
+  "bidichk",
+  "bodyclose",
+  "containedctx",
+  "contextcheck",
+  "copyloopvar",
+  "dogsled",
+  "durationcheck",
+  "errcheck",
+  "errchkjson",
+  "errname",
+  "fatcontext",
+  "forcetypeassert",
+  "gocheckcompilerdirectives",
+  "goconst",
+  "gofmt",
+  "goimports",
+  "goprintffuncname",
+  "gosec",
+  "gosimple",
+  "govet",
+  "ineffassign",
+  "loggercheck",
+  "makezero",
+  "nestif",
+  "nilnil",
+  "noctx",
+  "nosprintfhostport",
+  "prealloc",
+  "predeclared",
+  "reassign",
+  "sloglint",
+  "staticcheck",
+  "stylecheck",
+  "typecheck",
+  "unconvert",
+  "unparam",
+  "unused",
+  "usestdlibvars",
+  "wrapcheck"
+]
+
+[issues]
+fix = false

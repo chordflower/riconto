@@ -9,10 +9,13 @@ tasks:
       - cmd: "go clean -i ./..."
       - cmd: "rm -f riconto riconto.exe"
       - cmd: "rm -f termsize termsize.exe"
+      - cmd: "rm -f golangci-report.checkstyle.xml"
+      - cmd: "rm -f golangci-report.junit.xml"
   compile:
     desc: "Generates the binaries"
     dir: "{{.ROOT_DIR}}"
     cmds:
+      - cmd: "go generate ./..."
       - cmd: "go build -o . ./cmd/..."
   build:
     desc: "Builds a fresh version of the binaries"
@@ -20,3 +23,8 @@ tasks:
     cmds:
       - task: "clean"
       - task: "compile"
+  lint:
+    desc: "Lints the code with golangci-lint"
+    dir: "{{.ROOT_DIR}}"
+    cmds:
+      - cmd: "golangci-lint run"

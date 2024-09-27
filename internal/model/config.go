@@ -21,12 +21,14 @@ package model
 //go:generate go-enum --marshal
 
 import (
-	"emperror.dev/errors"
-	"github.com/goccy/go-yaml"
-	"github.com/json-iterator/go"
-	"github.com/pelletier/go-toml/v2"
 	"io"
 	"slices"
+
+	jsoniter "github.com/json-iterator/go"
+
+	"emperror.dev/errors"
+	"github.com/goccy/go-yaml"
+	"github.com/pelletier/go-toml/v2"
 )
 
 // Config represents the project configuration file
