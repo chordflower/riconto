@@ -15,6 +15,7 @@ tasks:
     desc: "Generates the binaries"
     dir: "{{.ROOT_DIR}}"
     cmds:
+      - cmd: "go install github.com/abice/go-enum@latest"
       - cmd: "go generate ./..."
       - cmd: "go build -o . ./cmd/..."
   build:
