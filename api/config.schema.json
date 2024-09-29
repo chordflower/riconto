@@ -27,10 +27,7 @@
       "default": ""
     },
     "license": {
-      "type": [
-        "string",
-        "array"
-      ],
+      "type": "array",
       "description": "The project license(s) in spdx format",
       "additionalItems": false,
       "items": {

@@ -1,0 +1,9 @@
+name: sample
+version: 0.0.1
+description: Some description
+authors:
+  - name: carddamom
+    url: https://github.com/carddamom
+    email: carddamom@tutanota.com
+license:
+  - GPL-3.0-or-later

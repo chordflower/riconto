@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with riconto.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package model
 
 //go:generate go-enum --marshal
@@ -66,7 +67,7 @@ func NewConfigFrom(config *Config) *Config {
 		Version:     config.Version,
 		Description: config.Description,
 		License:     slices.Clone(config.License),
-		Authors:     make([]Author, len(config.Authors)),
+		Authors:     make([]Author, 0, len(config.Authors)),
 	}
 	for _, author := range config.Authors {
 		res.Authors = append(res.Authors, *NewAuthorFrom(&author))
@@ -96,14 +97,64 @@ func (c *Config) SaveTo(writer io.Writer, format Format) error {
 		if err != nil {
 			return errors.Wrap(err, "Unable to encode the file as yaml")
 		}
-	default:
-		encoder := jsoniter.NewEncoder(writer)
-		err = encoder.Encode(c)
-		if err != nil {
-			return errors.Wrap(err, "Unable to encode the file as json")
-		}
 	}
 	return nil
+}
+
+// AddLicense adds the given license to this configuration
+func (c *Config) AddLicense(license string) bool {
+	if !slices.Contains(c.License, license) {
+		c.License = append(c.License, license)
+		return true
+	}
+	return false
+}
+
+// RemoveLicense removes the given license from this configuration
+func (c *Config) RemoveLicense(license string) bool {
+	if slices.Contains(c.License, license) {
+		c.License = slices.DeleteFunc(c.License, func(lic string) bool {
+			return lic == license
+		})
+		return true
+	}
+	return false
+}
+
+// ContainsLicense checks if the given license is in this configuration
+func (c *Config) ContainsLicense(license string) bool {
+	return slices.Contains(c.License, license)
+}
+
+// AddAuthor adds the given author to this configuration
+func (c *Config) AddAuthor(author *Author) bool {
+	if !slices.ContainsFunc(c.Authors, func(aut Author) bool {
+		return aut.Name == author.Name
+	}) {
+		c.Authors = append(c.Authors, *author)
+		return true
+	}
+	return false
+}
+
+// RemoveAuthor removes the given author from this configuration
+func (c *Config) RemoveAuthor(author *Author) bool {
+	if slices.ContainsFunc(c.Authors, func(aut Author) bool {
+		return aut.Name == author.Name
+	}) {
+		c.Authors = slices.DeleteFunc(c.Authors, func(aut Author) bool {
+			return aut.Name == author.Name
+		})
+		return true
+	}
+	return false
+}
+
+// ContainsAuthor checks if this configuration contains the given author
+func (c *Config) ContainsAuthor(author *Author) bool {
+	return slices.ContainsFunc(c.Authors, func(aut Author) bool {
+		return aut.Name == author.Name
+	})
 }
 
 // Author represents an package author
@@ -155,12 +206,6 @@ func ConfigFromFile(reader io.Reader, format Format) (*Config, error) {
 		err = decoder.Decode(result)
 		if err != nil {
 			return nil, errors.Wrap(err, "Unable to decode the file as yaml")
-		}
-	default:
-		decoder := jsoniter.NewDecoder(reader)
-		err = decoder.Decode(result)
-		if err != nil {
-			return nil, errors.Wrap(err, "Unable to decode the file as json")
 		}
 	}
 	return result, nil

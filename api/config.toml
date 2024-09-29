@@ -1,0 +1,9 @@
+name = "sample"
+version = "0.0.1"
+description = "Some description"
+license = ["GPL-3.0-or-later"]
+
+[[authors]]
+name = "carddamom"
+url = "https://github.com/carddamom"
+email = "carddamom@tutanota.com"

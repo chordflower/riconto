@@ -80,7 +80,6 @@ enable = [
   "unparam",
   "unused",
   "usestdlibvars",
-  "wrapcheck"
 ]
 
 [issues]

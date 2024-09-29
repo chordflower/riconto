@@ -20,12 +20,34 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+	"time"
+
 	"github.com/chordflower/riconto/internal/commands"
+	"github.com/phsym/console-slog"
+	"github.com/spf13/afero"
 	"github.com/tucnak/climax"
 )
 
 func main() {
-	initCmd := commands.NewInitCommand()
+	logger := slog.New(
+		console.NewHandler(os.Stdout, &console.HandlerOptions{
+			AddSource:  true,
+			Level:      slog.LevelInfo,
+			TimeFormat: time.RFC3339,
+		}),
+	)
+
+	osFs := afero.NewOsFs()
+	currdir, err := os.Getwd()
+	if err != nil {
+		logger.Error("Error creating the project", slog.Any("error", err))
+	}
+
+	initCmd := commands.NewInitCommand(afero.NewBasePathFs(
+		osFs, currdir,
+	), logger)
 	riconto := climax.New("riconto")
 	riconto.Brief = "A tool to create markdown based documents"
 	riconto.Version = "0.0.1"

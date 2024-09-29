@@ -21,16 +21,19 @@ package commands
 
 import (
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/buger/goterm"
 	"github.com/chordflower/riconto/internal/model"
+	"github.com/chordflower/riconto/internal/utils"
 	"github.com/muesli/reflow/wordwrap"
-	"github.com/phsym/console-slog"
+	"github.com/spf13/afero"
+	"github.com/thanhpk/randstr"
 	"github.com/tucnak/climax"
 )
 
@@ -42,9 +45,11 @@ type InitCommand struct {
 	group    string
 	flags    []climax.Flag
 	examples []climax.Example
+	logger   *slog.Logger
+	fs       afero.Fs
 }
 
-func NewInitCommand() *InitCommand {
+func NewInitCommand(fs afero.Fs, logger *slog.Logger) *InitCommand {
 	terminalWidth := goterm.Width()
 	helpStr := "" +
 		"This command will initializa a riconto project, creating the configuration file " +
@@ -122,6 +127,8 @@ func NewInitCommand() *InitCommand {
 		group:    "",
 		flags:    flags,
 		examples: examples,
+		fs:       fs,
+		logger:   logger,
 	}
 }
 
@@ -154,22 +161,15 @@ func (i *InitCommand) Examples() []climax.Example {
 }
 
 func (i *InitCommand) Run(context climax.Context) int {
-	logger := slog.New(
-		console.NewHandler(os.Stdout, &console.HandlerOptions{
-			AddSource:  true,
-			Level:      slog.LevelInfo,
-			TimeFormat: time.RFC3339,
-		}),
-	)
 	var err error
 	// 1. Validate if name is passed
 	if !context.Is("name") {
-		logger.Error("The name parameter is required!")
+		i.logger.Error("The name parameter is required!")
 		return 1
 	}
 
 	name, _ := context.Get("name")
-	logger.Info(fmt.Sprintf("Creating project named %s", name))
+	i.logger.Info(fmt.Sprintf("Creating project named %s", name))
 
 	// 2. Get the format to use
 	format := model.FormatToml
@@ -188,68 +188,63 @@ func (i *InitCommand) Run(context climax.Context) int {
 	}
 
 	// 4. Check if a configuration file already exists in the current directory
-	currdir, err := os.Getwd()
-	if err != nil {
-		logger.Error(err.Error())
-		return 1
-	}
-	if fileExists(filepath.Join(currdir, "riconto.json")) ||
-		fileExists(filepath.Join(currdir, "riconto.toml")) ||
-		fileExists(filepath.Join(currdir, "riconto.yaml")) {
-		logger.Error("There is already a configuration file in the current directory!")
+	if i.fileExists("riconto.json") ||
+		i.fileExists("riconto.toml") ||
+		i.fileExists("riconto.yaml") {
+		i.logger.Error("There is already a configuration file in the current directory!")
 		return 1
 	}
 
 	// 5. Create a temporary directory
-	tmpdir, err := os.MkdirTemp("", "riconto-")
+	tmpFs, err := createTmpFs()
 	if err != nil {
-		logger.Error("Unable to create the temporary directory", slog.Any("error", err))
+		i.logger.Error("Unable to create the temporary directory", slog.Any("error", err))
 		return 1
 	}
-	defer func(path string) {
-		_ = os.RemoveAll(path)
-	}(tmpdir)
+	defer func() {
+		_ = tmpFs.RemoveAll("/")
+	}()
 
 	// 6. Create the configuration file, with the correct values
 	config := model.NewConfig(name, version, "")
 
 	// 7. Write the configuration file to the temporary directory
-	writer, err := os.Create(filepath.Join(tmpdir, "riconto."+format.String()))
+	writer, err := tmpFs.OpenFile("riconto."+format.String(), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
-		logger.Error("Unable to create the configuration file", slog.Any("error", err))
+		i.logger.Error("Unable to create the configuration file", slog.Any("error", err))
 		return 1
 	}
-	defer func(writer *os.File) {
+	defer func(writer fs.File) {
 		_ = writer.Close()
 	}(writer)
 	err = config.SaveTo(writer, format)
 	if err != nil {
-		logger.Error("Unable to create the configuration file", slog.Any("error", err))
+		i.logger.Error("Unable to create the configuration file", slog.Any("error", err))
 		return 1
 	}
 
 	// 8. Create the rest of the directories to the temporary directory
-	err = os.MkdirAll(filepath.Join(tmpdir, "src"), 0750)
+	err = tmpFs.MkdirAll("src", 0750)
 	if err != nil {
-		logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
+		i.logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
 		return 1
 	}
-	err = os.MkdirAll(filepath.Join(tmpdir, "resources"), 0750)
+	err = tmpFs.MkdirAll("resources", 0750)
 	if err != nil {
-		logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
+		i.logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
 		return 1
 	}
-	touch, err := os.Create(filepath.Join(tmpdir, "src", "main.md"))
+	touch, err := tmpFs.OpenFile(filepath.Join("src", "main.md"), os.O_RDONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		logger.Error("Unable to create the auxiliary file", slog.Any("error", err))
+		i.logger.Error("Unable to create the auxiliary file", slog.Any("error", err))
 		return 1
 	}
 	_ = touch.Close()
 
 	// 9. Copy the temporary directory contents into the output directory
-	err = os.CopyFS(currdir, os.DirFS(tmpdir))
+	err = utils.MergeFilesystem(tmpFs, i.fs, "")
 	if err != nil {
-		logger.Error("Unable to copy the temporary dir to the output directory", slog.Any("error", err))
+		i.logger.Error("Unable to copy the temporary dir to the output directory", slog.Any("error", err))
 		return 1
 	}
 
@@ -262,10 +257,21 @@ func (i *InitCommand) Command() climax.Command {
 	return FromCommand(i)
 }
 
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
+func (i *InitCommand) fileExists(filename string) bool {
+	info, err := i.fs.Stat(filename)
 	if os.IsNotExist(err) {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func createTmpFs() (afero.Fs, error) {
+	osFs := afero.NewOsFs()
+	tmpdir := path.Join(os.TempDir(), "riconto-"+randstr.Hex(12))
+	err := osFs.MkdirAll(tmpdir, 0755)
+	if err != nil {
+		return nil, err
+	}
+	tmpFs := afero.NewBasePathFs(osFs, tmpdir)
+	return tmpFs, nil
 }
