@@ -29,3 +29,11 @@ tasks:
     dir: "{{.ROOT_DIR}}"
     cmds:
       - cmd: "golangci-lint run"
+  test:
+    desc: "Builds and runs the tests"
+    dir: "{{.ROOT_DIR}}"
+    deps:
+      - build
+    cmds:
+      - cmd: "go test -v ./..."
+

@@ -30,8 +30,8 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Builds the code"
-        run: "task build"
+      - name: "Build and test the code"
+        run: "task test"
       - name: "Lint code with golangci"
         uses: golangci/golangci-lint-action@v6
         with:
