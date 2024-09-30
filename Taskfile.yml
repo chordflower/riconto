@@ -36,4 +36,10 @@ tasks:
       - build
     cmds:
       - cmd: "go test -v ./..."
-
+  convey:
+    desc: "Starts goconvey server"
+    dir: "{{.ROOT_DIR}}"
+    silent: true
+    ignore_error: true
+    cmds:
+      - cmd: "goconvey -excludedDirs=api,assets,cmd,config,pkg,scripts"

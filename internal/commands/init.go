@@ -25,7 +25,6 @@ import (
 	"log/slog"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/buger/goterm"
@@ -33,7 +32,6 @@ import (
 	"github.com/chordflower/riconto/internal/utils"
 	"github.com/muesli/reflow/wordwrap"
 	"github.com/spf13/afero"
-	"github.com/thanhpk/randstr"
 	"github.com/tucnak/climax"
 )
 
@@ -196,11 +194,7 @@ func (i *InitCommand) Run(context climax.Context) int {
 	}
 
 	// 5. Create a temporary directory
-	tmpFs, err := createTmpFs()
-	if err != nil {
-		i.logger.Error("Unable to create the temporary directory", slog.Any("error", err))
-		return 1
-	}
+	tmpFs := createTmpFs()
 	defer func() {
 		_ = tmpFs.RemoveAll("/")
 	}()
@@ -234,7 +228,7 @@ func (i *InitCommand) Run(context climax.Context) int {
 		i.logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
 		return 1
 	}
-	touch, err := tmpFs.OpenFile(filepath.Join("src", "main.md"), os.O_RDONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	touch, err := tmpFs.OpenFile(path.Join("src", "main.md"), os.O_RDONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		i.logger.Error("Unable to create the auxiliary file", slog.Any("error", err))
 		return 1
@@ -247,8 +241,6 @@ func (i *InitCommand) Run(context climax.Context) int {
 		i.logger.Error("Unable to copy the temporary dir to the output directory", slog.Any("error", err))
 		return 1
 	}
-
-	// 10. Delete the temporary directory (done in defer)
 
 	return 0
 }
@@ -265,13 +257,6 @@ func (i *InitCommand) fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func createTmpFs() (afero.Fs, error) {
-	osFs := afero.NewOsFs()
-	tmpdir := path.Join(os.TempDir(), "riconto-"+randstr.Hex(12))
-	err := osFs.MkdirAll(tmpdir, 0755)
-	if err != nil {
-		return nil, err
-	}
-	tmpFs := afero.NewBasePathFs(osFs, tmpdir)
-	return tmpFs, nil
+func createTmpFs() afero.Fs {
+	return afero.NewMemMapFs()
 }
