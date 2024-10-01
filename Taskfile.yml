@@ -42,4 +42,5 @@ tasks:
     silent: true
     ignore_error: true
     cmds:
-      - cmd: "goconvey -excludedDirs=api,assets,cmd,config,pkg,scripts"
+      - cmd: "go install github.com/smartystreets/goconvey@latest"
+      - cmd: "goconvey -excludedDirs=api,assets,cmd,config,pkg,scripts,tmp"

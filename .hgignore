@@ -234,7 +234,8 @@ secring.*
 
 
 /.idea/
-/internal/model/config_enum.go
 /riconto
 /termsize
-/tmp/
+/golangci-report.checkstyle.xml
+/tmp
+/golangci-report.junit.xml
