@@ -40,6 +40,13 @@ const (
       "email": "carddamom@tutanota.com"
     }
   ],
+  "files": [
+    {
+      "name": "Book A",
+      "output": "./dist/bookA",
+      "path": "./src/bookA/main.md"
+    }
+  ],
   "license": ["GPL-3.0-or-later"]
 }`
 	jsonContentInvalid = `{
@@ -60,6 +67,11 @@ name = "sample"
 version = "0.0.1"
 description = "Some description"
 license = ["GPL-3.0-or-later"]
+
+[[files]]
+name = "Book A"
+output = "./dist/bookA"
+path = "./src/bookA/main.md"
 
 [[authors]]
 name = "carddamom"
@@ -85,6 +97,10 @@ authors:
   - name: carddamom
     url: https://github.com/carddamom
     email: carddamom@tutanota.com
+files:
+  - name: Book A
+    path: "./src/bookA/main.md"
+    output: "./dist/bookA"
 license:
   - GPL-3.0-or-later
 `
@@ -105,6 +121,7 @@ func TestConfig(t *testing.T) {
 	config := NewConfig("test", "1.2.0", "This is a sample package")
 	config.AddLicense("GPL3.0-or-later")
 	config.AddAuthor(NewAuthor("carddamom"))
+	config.AddFile(NewFile("test", "./dist/test", "./src/test.md"))
 	fs := afero.NewMemMapFs()
 
 	Convey("#Config", t, func() {
@@ -133,6 +150,25 @@ func TestConfig(t *testing.T) {
 			res := configDup.RemoveLicense("AL2")
 			So(res, ShouldBeFalse)
 			So(configDup.ContainsLicense("AL2"), ShouldBeFalse)
+		})
+
+		Convey("It should be possible to add a new File", func() {
+			res := configDup.AddFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md"))
+			So(res, ShouldBeTrue)
+			So(configDup.ContainsFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md")), ShouldBeTrue)
+		})
+
+		Convey("It should be possible to remove a File", func() {
+			configDup.AddFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md"))
+			res := configDup.RemoveFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md"))
+			So(res, ShouldBeTrue)
+			So(configDup.ContainsFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md")), ShouldBeFalse)
+		})
+
+		Convey("It should not be possible to remove a nonexisting File", func() {
+			res := configDup.RemoveFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md"))
+			So(res, ShouldBeFalse)
+			So(configDup.ContainsFile(NewFile("Book A", "./dist/bookA", "./src/bookA/main.md")), ShouldBeFalse)
 		})
 
 		Convey("It should not be possible to add a duplicate License", func() {

@@ -37,6 +37,7 @@ type Config struct {
 	Name        string   `json:"name" yaml:"name" toml:"name"`
 	Version     string   `json:"version" yaml:"version"  toml:"version"`
 	Description string   `json:"description" yaml:"description" toml:"description"`
+	Files       []File   `json:"files" toml:"files" yaml:"files"`
 	License     []string `json:"license" yaml:"license" toml:"license"`
 	Authors     []Author `json:"authors" yaml:"authors" toml:"authors"`
 }
@@ -44,6 +45,7 @@ type Config struct {
 func newConfig() *Config {
 	return &Config{
 		Version: "0.0.1",
+		Files:   make([]File, 0),
 		License: make([]string, 0),
 		Authors: make([]Author, 0),
 	}
@@ -55,6 +57,7 @@ func NewConfig(name string, version string, description string) *Config {
 		Name:        name,
 		Version:     version,
 		Description: description,
+		Files:       make([]File, 0),
 		License:     make([]string, 0),
 		Authors:     make([]Author, 0),
 	}
@@ -66,11 +69,15 @@ func NewConfigFrom(config *Config) *Config {
 		Name:        config.Name,
 		Version:     config.Version,
 		Description: config.Description,
+		Files:       make([]File, 0, len(config.Files)),
 		License:     slices.Clone(config.License),
 		Authors:     make([]Author, 0, len(config.Authors)),
 	}
 	for _, author := range config.Authors {
 		res.Authors = append(res.Authors, *NewAuthorFrom(&author))
+	}
+	for _, file := range config.Files {
+		res.Files = append(res.Files, *NewFileFrom(&file))
 	}
 	return res
 }
@@ -157,6 +164,37 @@ func (c *Config) ContainsAuthor(author *Author) bool {
 	})
 }
 
+// AddFile adds the given file to this configuration
+func (c *Config) AddFile(file *File) bool {
+	if !slices.ContainsFunc(c.Files, func(f File) bool {
+		return f.Name == file.Name
+	}) {
+		c.Files = append(c.Files, *file)
+		return true
+	}
+	return false
+}
+
+// RemoveFile removes the given file from this configuration
+func (c *Config) RemoveFile(file *File) bool {
+	if slices.ContainsFunc(c.Files, func(f File) bool {
+		return f.Name == file.Name
+	}) {
+		c.Files = slices.DeleteFunc(c.Files, func(f File) bool {
+			return f.Name == file.Name
+		})
+		return true
+	}
+	return false
+}
+
+// ContainsFile checks if this configuration contains the given file
+func (c *Config) ContainsFile(file *File) bool {
+	return slices.ContainsFunc(c.Files, func(f File) bool {
+		return f.Name == file.Name
+	})
+}
+
 // Author represents an package author
 type Author struct {
 	Name  string `json:"name" yaml:"name" toml:"name"`
@@ -177,6 +215,31 @@ func NewAuthorFrom(author *Author) *Author {
 		Name:  author.Name,
 		URL:   author.URL,
 		Email: author.Email,
+	}
+}
+
+// File represents a list of root files to build
+type File struct {
+	Name   string `json:"name" toml:"name" yaml:"name"`
+	Output string `json:"output" toml:"output" yaml:"output"`
+	Path   string `json:"path" toml:"path" yaml:"path"`
+}
+
+// NewFile creates a new file with the given data
+func NewFile(name, output, path string) *File {
+	return &File{
+		Name:   name,
+		Output: output,
+		Path:   path,
+	}
+}
+
+// NewFileFrom copies the given file
+func NewFileFrom(file *File) *File {
+	return &File{
+		Name:   file.Name,
+		Output: file.Output,
+		Path:   file.Path,
 	}
 }
 

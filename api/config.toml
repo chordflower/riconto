@@ -3,6 +3,16 @@ version = "0.0.1"
 description = "Some description"
 license = ["GPL-3.0-or-later"]
 
+[[files]]
+name = "Book A"
+output = "./dist/bookA"
+path = "./src/bookA/main.md"
+
+[[files]]
+name = "Book B"
+output = "./dist/bookB"
+path = "./src/bookB/main.md"
+
 [[authors]]
 name = "carddamom"
 url = "https://github.com/carddamom"

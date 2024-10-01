@@ -10,6 +10,18 @@
       "email": "carddamom@tutanota.com"
     }
   ],
+  "files": [
+    {
+      "name": "Book A",
+      "output": "./dist/bookA",
+      "path": "./src/bookA/main.md"
+    },
+    {
+      "name": "Book B",
+      "output": "./dist/bookB",
+      "path": "./src/bookB/main.md"
+    }
+  ],
   "license": [
     "GPL-3.0-or-later"
   ]

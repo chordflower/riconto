@@ -5,5 +5,12 @@ authors:
   - name: carddamom
     url: https://github.com/carddamom
     email: carddamom@tutanota.com
+files:
+  - name: Book A
+    path: "./src/bookA/main.md"
+    output: "./dist/bookA"
+  - name: Book B
+    path: "./src/bookB/main.md"
+    output: "./dist/bookB"
 license:
   - GPL-3.0-or-later

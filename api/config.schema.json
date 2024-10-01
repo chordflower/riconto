@@ -8,9 +8,6 @@
     "name"
   ],
   "properties": {
-    "$schema": {
-      "type": "string"
-    },
     "name": {
       "type": "string",
       "description": "The name of the project",
@@ -32,6 +29,46 @@
       "additionalItems": false,
       "items": {
         "type": "string"
+      }
+    },
+    "files": {
+      "type": "array",
+      "description": "A list of root files to build",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "path",
+          "output"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "A name to identify the output file",
+            "examples": [
+              "Book A"
+            ],
+            "minLength": 1
+          },
+          "output": {
+            "type": "string",
+            "description": "The name of the output file without extension (it will suffixed)",
+            "examples": [
+              "./dist/bookA"
+            ],
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "description": "The path of the main markdown file",
+            "examples": [
+              "./dist/main.md"
+            ],
+            "minLength": 1
+          }
+        }
       }
     },
     "authors": {
