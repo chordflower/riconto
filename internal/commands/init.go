@@ -27,9 +27,10 @@ import (
 	"path"
 	"strings"
 
+	"github.com/chordflower/riconto/pkg/utils"
+
 	"github.com/buger/goterm"
 	"github.com/chordflower/riconto/internal/model"
-	"github.com/chordflower/riconto/internal/utils"
 	"github.com/muesli/reflow/wordwrap"
 	"github.com/spf13/afero"
 	"github.com/tucnak/climax"
