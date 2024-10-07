@@ -95,4 +95,10 @@ Note that before starting contributing:
 
 ## 🛡️ License:
 
-This project is licensed under the GPL-3.0 or later.
+The code of this project is licensed under the GNU General Public License 3.0 or later, the public library of this project is licensed under the GNU Lesser General Public License 3.0 or later and the rest (mostly data) is under the Creative Commons CC0 1.0 Universal license.
+
+So:
+
+- cmd and internal (recursively) => GNU General Public License 3.0 or later;
+- pkg (recursively) => GNU Lesser General Public License 3.0 or later;
+- other stuff => Creative Commons CC0 1.0 Universal.
