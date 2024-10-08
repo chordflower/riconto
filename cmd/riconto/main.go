@@ -45,12 +45,12 @@ func main() {
 		logger.Error("Error creating the project", slog.Any("error", err))
 	}
 
-	initCmd := commands.NewInitCommand(afero.NewBasePathFs(
+	createCommand := commands.NewCreateCommand(afero.NewBasePathFs(
 		osFs, currdir,
 	), logger)
 	riconto := climax.New("riconto")
 	riconto.Brief = "A tool to create markdown based documents"
 	riconto.Version = "0.0.1"
-	riconto.AddCommand(initCmd.Command())
+	riconto.AddCommand(createCommand.Command())
 	riconto.Run()
 }

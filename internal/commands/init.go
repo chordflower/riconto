@@ -36,7 +36,7 @@ import (
 	"github.com/tucnak/climax"
 )
 
-type InitCommand struct {
+type CreateCommand struct {
 	name     string
 	brief    string
 	usage    string
@@ -48,10 +48,10 @@ type InitCommand struct {
 	fs       afero.Fs
 }
 
-func NewInitCommand(fs afero.Fs, logger *slog.Logger) *InitCommand {
+func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 	terminalWidth := goterm.Width()
 	helpStr := "" +
-		"This command will initializa a riconto project, creating the configuration file " +
+		"This command will initialize a riconto project, creating the configuration file " +
 		"and all of the needed directories, in the directory where the executable is called.\n" +
 		"It can create the configuration file in three different formats:\n\n" +
 		"- json\n" +
@@ -66,9 +66,6 @@ func NewInitCommand(fs afero.Fs, logger *slog.Logger) *InitCommand {
 		"Also the parameter --name or -n is required and specifies the name of the project in " +
 		"the configuration file and can be any string, noting that strings with spaces will have " +
 		"to be quoted due to limitations of the command line.\n\n" +
-		"Note that, if a configuration file is already present in the directory, the command " +
-		"does nothing and exists with an error, even if the configuration file is in a different " +
-		"format!\n" +
 		"As for the directories, if they are present, they will not be created or overwritten."
 	flags := make([]climax.Flag, 0, 4)
 	flags = append(flags, climax.Flag{
@@ -118,9 +115,9 @@ func NewInitCommand(fs afero.Fs, logger *slog.Logger) *InitCommand {
 		Description: "Creates a project named example in the current directory, " +
 			"with a riconto.toml file and version 0.0.1",
 	})
-	return &InitCommand{
-		name:     "init",
-		brief:    "initializes a new project",
+	return &CreateCommand{
+		name:     "create",
+		brief:    "creates a new project",
 		usage:    "--name name [--version version] [--format json|yaml|toml]",
 		help:     wordwrap.String(strings.TrimSpace(helpStr), terminalWidth),
 		group:    "",
@@ -131,35 +128,35 @@ func NewInitCommand(fs afero.Fs, logger *slog.Logger) *InitCommand {
 	}
 }
 
-func (i *InitCommand) Name() string {
+func (i *CreateCommand) Name() string {
 	return i.name
 }
 
-func (i *InitCommand) Brief() string {
+func (i *CreateCommand) Brief() string {
 	return i.brief
 }
 
-func (i *InitCommand) Usage() string {
+func (i *CreateCommand) Usage() string {
 	return i.usage
 }
 
-func (i *InitCommand) Help() string {
+func (i *CreateCommand) Help() string {
 	return i.help
 }
 
-func (i *InitCommand) Group() string {
+func (i *CreateCommand) Group() string {
 	return i.group
 }
 
-func (i *InitCommand) Flags() []climax.Flag {
+func (i *CreateCommand) Flags() []climax.Flag {
 	return i.flags
 }
 
-func (i *InitCommand) Examples() []climax.Example {
+func (i *CreateCommand) Examples() []climax.Example {
 	return i.examples
 }
 
-func (i *InitCommand) Run(context climax.Context) int {
+func (i *CreateCommand) Run(context climax.Context) int {
 	var err error
 	// 1. Validate if name is passed
 	if !context.Is("name") {
@@ -246,11 +243,11 @@ func (i *InitCommand) Run(context climax.Context) int {
 	return 0
 }
 
-func (i *InitCommand) Command() climax.Command {
+func (i *CreateCommand) Command() climax.Command {
 	return FromCommand(i)
 }
 
-func (i *InitCommand) fileExists(filename string) bool {
+func (i *CreateCommand) fileExists(filename string) bool {
 	info, err := i.fs.Stat(filename)
 	if os.IsNotExist(err) {
 		return false
