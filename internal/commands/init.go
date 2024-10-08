@@ -76,6 +76,20 @@ func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 		Variable: true,
 	})
 	flags = append(flags, climax.Flag{
+		Name:     "description",
+		Short:    "d",
+		Usage:    "--description DESCRIPTION",
+		Help:     "The description of the project (default empty)",
+		Variable: true,
+	})
+	flags = append(flags, climax.Flag{
+		Name:     "license",
+		Short:    "l",
+		Usage:    "--license LICENSE",
+		Help:     "The license of the project (default empty)",
+		Variable: true,
+	})
+	flags = append(flags, climax.Flag{
 		Name:     "version",
 		Short:    "v",
 		Usage:    "--version VERSION",
@@ -101,6 +115,16 @@ func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 			"with a riconto.toml file and version 1.2.0",
 	})
 	examples = append(examples, climax.Example{
+		Usecase: `--name example --description "Project description"`,
+		Description: "Creates a project named example in the current directory, " +
+			`with a riconto.toml file and description named "Project description"`,
+	})
+	examples = append(examples, climax.Example{
+		Usecase: "--name example --license MIT",
+		Description: "Creates a project named example in the current directory, " +
+			"with a riconto.toml file and license MIT",
+	})
+	examples = append(examples, climax.Example{
 		Usecase: "--name example --format json",
 		Description: "Creates a project named example in the current directory, " +
 			"with a riconto.json file and version 0.0.1",
@@ -118,7 +142,7 @@ func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 	return &CreateCommand{
 		name:     "create",
 		brief:    "creates a new project",
-		usage:    "--name name [--version version] [--format json|yaml|toml]",
+		usage:    "--name name [--version version] [--format json|yaml|toml] [--description description] [--license license]",
 		help:     wordwrap.String(strings.TrimSpace(helpStr), terminalWidth),
 		group:    "",
 		flags:    flags,
@@ -183,7 +207,19 @@ func (i *CreateCommand) Run(context climax.Context) int {
 		version, _ = context.Get("version")
 	}
 
-	// 4. Check if a configuration file already exists in the current directory
+	// 4. Get the description to use
+	description := ""
+	if context.Is("description") {
+		description, _ = context.Get("description")
+	}
+
+	// 5. Get the description to use
+	license := ""
+	if context.Is("license") {
+		license, _ = context.Get("license")
+	}
+
+	// 6. Check if a configuration file already exists in the current directory
 	if i.fileExists("riconto.json") ||
 		i.fileExists("riconto.toml") ||
 		i.fileExists("riconto.yaml") {
@@ -191,16 +227,17 @@ func (i *CreateCommand) Run(context climax.Context) int {
 		return 1
 	}
 
-	// 5. Create a temporary directory
+	// 7. Create a temporary directory
 	tmpFs := createTmpFs()
 	defer func() {
 		_ = tmpFs.RemoveAll("/")
 	}()
 
-	// 6. Create the configuration file, with the correct values
-	config := model.NewConfig(name, version, "")
+	// 8. Create the configuration file, with the correct values
+	config := model.NewConfig(name, version, description)
+	config.AddLicense(license)
 
-	// 7. Write the configuration file to the temporary directory
+	// 9. Write the configuration file to the temporary directory
 	writer, err := tmpFs.OpenFile("riconto."+format.String(), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
 		i.logger.Error("Unable to create the configuration file", slog.Any("error", err))
@@ -215,7 +252,7 @@ func (i *CreateCommand) Run(context climax.Context) int {
 		return 1
 	}
 
-	// 8. Create the rest of the directories to the temporary directory
+	// 10. Create the rest of the directories to the temporary directory
 	err = tmpFs.MkdirAll("src", 0750)
 	if err != nil {
 		i.logger.Error("Unable to create the auxiliary directories", slog.Any("error", err))
@@ -233,7 +270,7 @@ func (i *CreateCommand) Run(context climax.Context) int {
 	}
 	_ = touch.Close()
 
-	// 9. Copy the temporary directory contents into the output directory
+	// 11. Copy the temporary directory contents into the output directory
 	err = utils.MergeFilesystem(tmpFs, i.fs, "")
 	if err != nil {
 		i.logger.Error("Unable to copy the temporary dir to the output directory", slog.Any("error", err))
