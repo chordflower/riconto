@@ -67,7 +67,7 @@ func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 		"the configuration file and can be any string, noting that strings with spaces will have " +
 		"to be quoted due to limitations of the command line.\n\n" +
 		"As for the directories, if they are present, they will not be created or overwritten."
-	flags := make([]climax.Flag, 0, 4)
+	flags := make([]climax.Flag, 0, 7)
 	flags = append(flags, climax.Flag{
 		Name:     "name",
 		Short:    "n",
@@ -102,6 +102,13 @@ func NewCreateCommand(fs afero.Fs, logger *slog.Logger) *CreateCommand {
 		Usage:    "--format json|yaml|toml",
 		Help:     "The configuration file format (default toml)",
 		Variable: true,
+	})
+	flags = append(flags, climax.Flag{
+		Name:     "strict",
+		Short:    "s",
+		Usage:    "--strict",
+		Help:     "Ends with an error code if a configuration file already exists",
+		Variable: false,
 	})
 	examples := make([]climax.Example, 0, 5)
 	examples = append(examples, climax.Example{
@@ -219,12 +226,17 @@ func (i *CreateCommand) Run(context climax.Context) int {
 		license, _ = context.Get("license")
 	}
 
+	strict := context.Is("strict")
+
 	// 6. Check if a configuration file already exists in the current directory
 	if i.fileExists("riconto.json") ||
 		i.fileExists("riconto.toml") ||
 		i.fileExists("riconto.yaml") {
 		i.logger.Error("There is already a configuration file in the current directory!")
-		return 1
+		if strict {
+			return 1
+		}
+		return 0
 	}
 
 	// 7. Create a temporary directory
