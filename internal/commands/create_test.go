@@ -36,8 +36,8 @@ func TestCreateCommand(t *testing.T) {
 		Convey("It should be able to create a new command", func() {
 			createCommand = NewCreateCommand(afero.NewMemMapFs(), golog.NewDiscard())
 			So(createCommand, ShouldNotBeNil)
-			So(createCommand.Name(), ShouldEqual, "init")
-			So(createCommand.Brief(), ShouldEqual, "initializes a new project")
+			So(createCommand.Name(), ShouldEqual, "create")
+			So(createCommand.Brief(), ShouldEqual, "creates a new project")
 		})
 
 		Convey("Given some parameters", func() {
