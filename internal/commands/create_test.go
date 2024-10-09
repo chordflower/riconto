@@ -29,20 +29,20 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestInitCommand(t *testing.T) {
-	Convey("#InitCommand", t, func() {
-		var initCommand *InitCommand
+func TestCreateCommand(t *testing.T) {
+	Convey("#CreateCommand", t, func() {
+		var createCommand *CreateCommand
 
 		Convey("It should be able to create a new command", func() {
-			initCommand = NewInitCommand(afero.NewMemMapFs(), golog.NewDiscard())
-			So(initCommand, ShouldNotBeNil)
-			So(initCommand.Name(), ShouldEqual, "init")
-			So(initCommand.Brief(), ShouldEqual, "initializes a new project")
+			createCommand = NewCreateCommand(afero.NewMemMapFs(), golog.NewDiscard())
+			So(createCommand, ShouldNotBeNil)
+			So(createCommand.Name(), ShouldEqual, "create")
+			So(createCommand.Brief(), ShouldEqual, "creates a new project")
 		})
 
 		Convey("Given some parameters", func() {
 			memFs := afero.NewMemMapFs()
-			initCommand = NewInitCommand(memFs, golog.NewDiscard())
+			createCommand = NewCreateCommand(memFs, golog.NewDiscard())
 
 			Convey("With a name", func() {
 				name := "sample"
@@ -54,7 +54,7 @@ func TestInitCommand(t *testing.T) {
 						NonVariable: make(map[string]bool),
 						Variable:    map[string]string{"name": name, "format": "toml"},
 					}
-					So(initCommand.Run(context), ShouldEqual, 0)
+					So(createCommand.Run(context), ShouldEqual, 0)
 					info, err := memFs.Stat("riconto.toml")
 					So(err, ShouldBeNil)
 					So(info.IsDir(), ShouldBeFalse)
@@ -78,7 +78,7 @@ func TestInitCommand(t *testing.T) {
 						NonVariable: make(map[string]bool),
 						Variable:    map[string]string{"name": name, "format": "yaml"},
 					}
-					So(initCommand.Run(context), ShouldEqual, 0)
+					So(createCommand.Run(context), ShouldEqual, 0)
 					info, err := memFs.Stat("riconto.yaml")
 					So(err, ShouldBeNil)
 					So(info.IsDir(), ShouldBeFalse)
@@ -102,7 +102,7 @@ func TestInitCommand(t *testing.T) {
 						NonVariable: make(map[string]bool),
 						Variable:    map[string]string{"name": name, "format": "json"},
 					}
-					So(initCommand.Run(context), ShouldEqual, 0)
+					So(createCommand.Run(context), ShouldEqual, 0)
 					info, err := memFs.Stat("riconto.json")
 					So(err, ShouldBeNil)
 					So(info.IsDir(), ShouldBeFalse)
@@ -128,7 +128,7 @@ func TestInitCommand(t *testing.T) {
 							NonVariable: make(map[string]bool),
 							Variable:    map[string]string{"name": name},
 						}
-						So(initCommand.Run(context), ShouldEqual, 0)
+						So(createCommand.Run(context), ShouldEqual, 0)
 						info, err := memFs.Stat("riconto.toml")
 						So(err, ShouldBeNil)
 						So(info.IsDir(), ShouldBeFalse)
@@ -155,7 +155,7 @@ func TestInitCommand(t *testing.T) {
 								NonVariable: make(map[string]bool),
 								Variable:    map[string]string{"name": name, "version": version},
 							}
-							So(initCommand.Run(context), ShouldEqual, 0)
+							So(createCommand.Run(context), ShouldEqual, 0)
 							info, err := memFs.Stat("riconto.toml")
 							So(err, ShouldBeNil)
 							So(info.IsDir(), ShouldBeFalse)
@@ -184,7 +184,7 @@ func TestInitCommand(t *testing.T) {
 						NonVariable: make(map[string]bool),
 						Variable:    make(map[string]string),
 					}
-					So(initCommand.Run(context), ShouldEqual, 1)
+					So(createCommand.Run(context), ShouldEqual, 1)
 				})
 			})
 		})

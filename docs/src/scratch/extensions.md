@@ -77,4 +77,4 @@ Which extracts three groups:
 
 - `::include[<markdown_file_to_include>]` => Parses the given markdown file and includes it in the current document ast. (Careful with recursive includes!);
 - `::embed[<thing_to_embed>]{type=TYPE}` => Includes the given url using oEmbed, uses [go-oembed](https://github.com/dyatlov/go-oembed), to return oEmbed information;
-- ::toc => Includes a table of contents;
+- `::toc` => Includes a table of contents;
