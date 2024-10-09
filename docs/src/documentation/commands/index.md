@@ -1,11 +1,12 @@
 ---
-title: "Documentation for Riconto"
-description: "This is the main documentation for riconto"
+title: "Commands of Riconto"
+description: "This is the main page for the commands of riconto"
 authors:
   - name: "carddamom"
     email: "carddamom at tutanota dot com"
 tags:
   - riconto
+  - commands
   - documentation
 metadata:
   created: "2024-10-09T11:42:12.791404Z"
@@ -13,14 +14,11 @@ metadata:
   modified: "2024-10-09T11:42:12.791404Z"
 ---
 
-# Riconto #
+Riconto has the following commands:
 
-This is the main documentation for riconto.
+- create
 
-## Index ##
+### Create Command ###
 
-::toc
+::include[./create.md]
 
-## Commands ##
-
-::include[./commands/index.md]
